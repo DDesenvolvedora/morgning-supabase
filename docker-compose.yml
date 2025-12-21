@@ -453,9 +453,6 @@ services:
     container_name: morgning-supabase-pooler
     image: supabase/supavisor:2.7.4
     restart: unless-stopped
-    ports:
-      - ${POSTGRES_PORT}:5433
-      - ${POOLER_PROXY_PORT_TRANSACTION}:6544
     volumes:
       - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z
     healthcheck:
