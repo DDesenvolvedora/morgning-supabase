@@ -535,3 +535,8 @@ services:
 
 volumes:
   db-config:
+    driver: local
+
+networks:
+  default:
+    name: supabase_network
