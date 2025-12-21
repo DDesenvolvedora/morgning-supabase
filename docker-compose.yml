@@ -59,7 +59,7 @@ services:
       # Uncomment to use Big Query backend for analytics
       # NEXT_ANALYTICS_BACKEND_PROVIDER: bigquery
     ports:
-      - "13000:3000"
+      - "23000:3000"
   kong:
     container_name: morgning-supabase-kong
     image: kong:2.8.1
@@ -420,7 +420,7 @@ services:
         "log_min_messages=fatal", # prevents Realtime polling queries from appearing in logs
       ]
     ports:
-      - "15432:5432"
+      - "25432:5432"
 
   vector:
     container_name: morgning-supabase-vector
