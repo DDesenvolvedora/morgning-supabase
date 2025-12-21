@@ -59,7 +59,7 @@ services:
       # Uncomment to use Big Query backend for analytics
       # NEXT_ANALYTICS_BACKEND_PROVIDER: bigquery
     ports:
-      - "3001:3000"
+      - "13010:3000"
   kong:
     container_name: morgning-supabase-kong
     image: kong:2.8.1
@@ -87,7 +87,8 @@ services:
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
     # https://unix.stackexchange.com/a/294837
     entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
-
+    ports:
+      - "18010:8000"
   auth:
     container_name: morgning-supabase-auth
     image: supabase/gotrue:v2.184.0
@@ -420,7 +421,7 @@ services:
         "log_min_messages=fatal", # prevents Realtime polling queries from appearing in logs
       ]
     ports:
-      - "5434:5432"
+      - "15433:5432"
 
   vector:
     container_name: morgning-supabase-vector
