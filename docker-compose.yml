@@ -59,14 +59,14 @@ services:
       # Uncomment to use Big Query backend for analytics
       # NEXT_ANALYTICS_BACKEND_PROVIDER: bigquery
     ports:
-      - "23000:3000"
+      - "3001:3000"
   kong:
     container_name: morgning-supabase-kong
     image: kong:2.8.1
     restart: unless-stopped
     ports:
-      - ${KONG_HTTP_PORT}:28000/tcp
-      - ${KONG_HTTPS_PORT}:28443/tcp
+      - ${KONG_HTTP_PORT}:8001/tcp
+      - ${KONG_HTTPS_PORT}:8444/tcp
     volumes:
       # https://github.com/supabase/supabase/issues/12661
       - ./volumes/api/kong.yml:/home/kong/temp.yml:ro,z
@@ -334,7 +334,7 @@ services:
     image: supabase/logflare:1.27.0
     restart: unless-stopped
     ports:
-      - 24000:4000
+      - 4001:4000
     # Uncomment to use Big Query backend for analytics
     # volumes:
     #   - type: bind
@@ -420,7 +420,7 @@ services:
         "log_min_messages=fatal", # prevents Realtime polling queries from appearing in logs
       ]
     ports:
-      - "25432:5432"
+      - "5433:5432"
 
   vector:
     container_name: morgning-supabase-vector
@@ -454,8 +454,8 @@ services:
     image: supabase/supavisor:2.7.4
     restart: unless-stopped
     ports:
-      - ${POSTGRES_PORT}:25432
-      - ${POOLER_PROXY_PORT_TRANSACTION}:26543
+      - ${POSTGRES_PORT}:5433
+      - ${POOLER_PROXY_PORT_TRANSACTION}:6544
     volumes:
       - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z
     healthcheck:
