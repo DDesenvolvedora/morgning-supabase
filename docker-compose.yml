@@ -87,8 +87,7 @@ services:
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
     # https://unix.stackexchange.com/a/294837
     entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
-    ports:
-      - "18010:8000"
+
   auth:
     container_name: morgning-supabase-auth
     image: supabase/gotrue:v2.184.0
