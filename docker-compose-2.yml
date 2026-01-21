@@ -252,6 +252,7 @@ services:
       timeout: 5s
       interval: 5s
       retries: 3
+      start_period: 30s # ADICIONAR: Dar tempo para DB estar pronto
     depends_on:
       db:
         condition: service_healthy
@@ -266,7 +267,8 @@ services:
       SERVICE_KEY: ${SERVICE_ROLE_KEY}
       POSTGREST_URL: http://rest:3000
       PGRST_JWT_SECRET: ${JWT_SECRET}
-      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      #DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       REQUEST_ALLOW_X_FORWARDED_PATH: "true"
       FILE_SIZE_LIMIT: ${FILE_SIZE_LIMIT:-52428800} # Adicionar default de 50MB
       STORAGE_BACKEND: file
@@ -423,6 +425,10 @@ services:
         "config_file=/etc/postgresql/postgresql.conf",
         "-c",
         "log_min_messages=fatal", # prevents Realtime polling queries from appearing in logs
+        "-c",
+        "max_connections=200", # ADICIONAR (padrão é 100)
+        "-c",
+        "shared_buffers=256MB", # ADICIONAR
       ]
     ports:
       - "15432:5432"
