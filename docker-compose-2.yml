@@ -70,7 +70,7 @@ services:
       - ${KONG_HTTPS_PORT}:8443/tcp
     volumes:
       # https://github.com/supabase/supabase/issues/12661
-      - ./volumes/api/kong.yml:/home/kong/temp.yml:ro,z
+      - ./volumes/api/kong.yml:/home/kong/temp.yml:ro
     depends_on:
       analytics:
         condition: service_healthy
@@ -239,20 +239,21 @@ services:
     image: supabase/storage-api:v1.33.0
     restart: unless-stopped
     volumes:
-      - ./volumes/storage:/var/lib/storage # Remover :z
+      - ./volumes/storage:/var/lib/storage
     healthcheck:
-      test: [
+      test:
+        [
           "CMD",
           "wget",
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:5000/status", # Usar localhost em vez de storage
+          "http://localhost:5000/status",
         ]
       timeout: 5s
       interval: 5s
       retries: 3
-      start_period: 30s # ADICIONAR: Dar tempo para DB estar pronto
+      start_period: 30s
     depends_on:
       db:
         condition: service_healthy
@@ -261,16 +262,15 @@ services:
       imgproxy:
         condition: service_started
       analytics:
-        condition: service_healthy # ADICIONAR
+        condition: service_healthy
     environment:
       ANON_KEY: ${ANON_KEY}
       SERVICE_KEY: ${SERVICE_ROLE_KEY}
       POSTGREST_URL: http://rest:3000
       PGRST_JWT_SECRET: ${JWT_SECRET}
-      #DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       REQUEST_ALLOW_X_FORWARDED_PATH: "true"
-      FILE_SIZE_LIMIT: ${FILE_SIZE_LIMIT:-52428800} # Adicionar default de 50MB
+      FILE_SIZE_LIMIT: ${FILE_SIZE_LIMIT:-52428800}
       STORAGE_BACKEND: file
       FILE_STORAGE_BACKEND_PATH: /var/lib/storage
       TENANT_ID: stub
@@ -278,15 +278,17 @@ services:
       GLOBAL_S3_BUCKET: stub
       ENABLE_IMAGE_TRANSFORMATION: "true"
       IMGPROXY_URL: http://imgproxy:5001
-      # ADICIONAR ESTAS VARIÁVEIS IMPORTANTES:
-      IS_MULTITENANT: "false"
+      DB_POOL_SIZE: 10
+      DB_CONNECTION_TIMEOUT: 5000
+    ports:
+      - ${STORAGE_PORT:-5000}:5000
 
   imgproxy:
     container_name: supabase-imgproxy
     image: darthsim/imgproxy:v3.8.0
     restart: unless-stopped
     volumes:
-      - ./volumes/storage:/var/lib/storage:z
+      - ./volumes/storage:/var/lib/storage
     healthcheck:
       test: ["CMD", "imgproxy", "health"]
       timeout: 5s
@@ -419,16 +421,17 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXP: ${JWT_EXPIRY}
-    command: [
+    command:
+      [
         "postgres",
         "-c",
         "config_file=/etc/postgresql/postgresql.conf",
         "-c",
-        "log_min_messages=fatal", # prevents Realtime polling queries from appearing in logs
+        "log_min_messages=fatal",
         "-c",
-        "max_connections=200", # ADICIONAR (padrão é 100)
+        "max_connections=200",
         "-c",
-        "shared_buffers=256MB", # ADICIONAR
+        "shared_buffers=256MB",
       ]
     ports:
       - "15432:5432"
@@ -438,8 +441,8 @@ services:
     image: timberio/vector:0.28.1-alpine
     restart: unless-stopped
     volumes:
-      - ./volumes/logs/vector.yml:/etc/vector/vector.yml:ro,z
-      - ${DOCKER_SOCKET_LOCATION}:/var/run/docker.sock:ro,z
+      - ./volumes/logs/vector.yml:/etc/vector/vector.yml:ro
+      - ${DOCKER_SOCKET_LOCATION}:/var/run/docker.sock:ro
     healthcheck:
       test:
         [
@@ -456,8 +459,6 @@ services:
     environment:
       LOGFLARE_PUBLIC_ACCESS_TOKEN: ${LOGFLARE_PUBLIC_ACCESS_TOKEN}
     command: ["--config", "/etc/vector/vector.yml"]
-    security_opt:
-      - "label=disable"
 
   # Update the DATABASE_URL if you are using an external Postgres database
   supavisor:
@@ -465,10 +466,10 @@ services:
     image: supabase/supavisor:2.7.4
     restart: unless-stopped
     ports:
-      - ${POOLER_PORT:-54322}:5432 # Usar porta diferente no host
-      - ${POOLER_PROXY_PORT_TRANSACTION}:6543
+      - 54322:5432
+      - ${POOLER_PROXY_PORT_TRANSACTION:-6543}:6543
     volumes:
-      - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z
+      - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro
     healthcheck:
       test:
         [
@@ -493,7 +494,7 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      DATABASE_URL: ecto://supabase_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/_supabase
+      DATABASE_URL: ecto://supabase_admin:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/_supabase
       CLUSTER_POSTGRES: true
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       VAULT_ENC_KEY: ${VAULT_ENC_KEY}
