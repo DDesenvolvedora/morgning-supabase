@@ -239,28 +239,28 @@ services:
     image: supabase/storage-api:v1.33.0
     restart: unless-stopped
     volumes:
-      - ./volumes/storage:/var/lib/storage:z
+      - ./volumes/storage:/var/lib/storage # Remover :z
     healthcheck:
-      test:
-        [
+      test: [
           "CMD",
           "wget",
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://storage:5000/status",
+          "http://localhost:5000/status", # Usar localhost em vez de storage
         ]
       timeout: 5s
       interval: 5s
       retries: 3
     depends_on:
       db:
-        # Disable this if you are using an external Postgres database
         condition: service_healthy
       rest:
         condition: service_started
       imgproxy:
         condition: service_started
+      analytics:
+        condition: service_healthy # ADICIONAR
     environment:
       ANON_KEY: ${ANON_KEY}
       SERVICE_KEY: ${SERVICE_ROLE_KEY}
@@ -268,15 +268,16 @@ services:
       PGRST_JWT_SECRET: ${JWT_SECRET}
       DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       REQUEST_ALLOW_X_FORWARDED_PATH: "true"
-      FILE_SIZE_LIMIT: ${FILE_SIZE_LIMIT}
+      FILE_SIZE_LIMIT: ${FILE_SIZE_LIMIT:-52428800} # Adicionar default de 50MB
       STORAGE_BACKEND: file
       FILE_STORAGE_BACKEND_PATH: /var/lib/storage
       TENANT_ID: stub
-      # TODO: https://github.com/supabase/storage-api/issues/55
       REGION: stub
       GLOBAL_S3_BUCKET: stub
       ENABLE_IMAGE_TRANSFORMATION: "true"
       IMGPROXY_URL: http://imgproxy:5001
+      # ADICIONAR ESTAS VARIÁVEIS IMPORTANTES:
+      IS_MULTITENANT: "false"
 
   imgproxy:
     container_name: supabase-imgproxy
@@ -458,7 +459,7 @@ services:
     image: supabase/supavisor:2.7.4
     restart: unless-stopped
     ports:
-      - ${POSTGRES_PORT}:5432
+      - ${POOLER_PORT:-54322}:5432 # Usar porta diferente no host
       - ${POOLER_PROXY_PORT_TRANSACTION}:6543
     volumes:
       - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z
