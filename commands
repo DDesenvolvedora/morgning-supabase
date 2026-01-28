@@ -1,0 +1,18 @@
+pg_dump -h 147.182.245.226 -p 15432 -U postgres -Fc -f backup.dump postgres
+
+pg_dumpall -h 147.182.245.226 -p 15432 -U postgres --globals-only > globals.sql
+
+
+psql -h 147.182.245.226 -p 15433 -U postgres -f globals.sql
+
+pg_restore -h 147.182.245.226 -p 15433 -U postgres --clean --if-exists --no-owner --no-privileges -d postgres backup.dump
+
+
+
+
+
+pg_dump -h 147.182.245.226 -p 15434 -U postgres -Fc -f backup.dump postgres
+
+ashdasj2184asde8r71*&&jdas*SLA%Bjsahd6
+
+Test-NetConnection 147.182.245.226 -Port 15434
