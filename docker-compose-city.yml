@@ -192,7 +192,7 @@ services:
 
   realtime:
     # This container name looks inconsistent but is correct because realtime constructs tenant id by parsing the subdomain
-    container_name: realtime-dev.supabase-realtime_city
+    container_name: realtime_city.supabase-realtime
     image: supabase/realtime:v2.68.0
     restart: unless-stopped
     depends_on:
@@ -205,7 +205,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          'curl -sSfL --head -o /dev/null -H "Authorization: Bearer ${ANON_KEY}" http://localhost:4000/api/tenants/realtime-dev/health',
+          'curl -sSfL --head -o /dev/null -H "Authorization: Bearer ${ANON_KEY}" http://localhost:4000/api/tenants/realtime_city/health',
         ]
       timeout: 5s
       interval: 5s
@@ -392,7 +392,7 @@ services:
       # Changes required for Pooler support
       - ./volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:Z
       # Use named volume to persist pgsodium decryption key between restarts
-      - db-config:/etc/postgresql-custom
+      - db-config_city:/etc/postgresql-custom
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
       interval: 5s
@@ -502,4 +502,4 @@ services:
       ]
 
 volumes:
-  db-config:
+  db-config_city:
